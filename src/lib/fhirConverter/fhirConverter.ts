@@ -26,7 +26,7 @@ export default class FhirConverter {
             let dataTypeHandler =  dataHandlerFactory.createDataHandler("fhir")
             let hbInstance = hb(true, dataTypeHandler, path.join(constants.TEMPLATE_FILES_LOCATION, dataTypeHandler.dataType))
             
-            let parsedData: R4.IBundle = await dataTypeHandler.parseSrcData(this.bundle);
+            let parsedData: R4.IBundle = await dataTypeHandler.parseSrcData(this.bundle, this.templateName);
 
             let template = await this.getTemplateFromFile("fhir", this.templateName, dataTypeHandler, hbInstance)
     
@@ -44,11 +44,6 @@ export default class FhirConverter {
             }
         }
 
-
-
-        // let template = `MSH|^~\&|PIMS||IPMS||${new Date().toISOString().slice(0, 10).split('-').join('')}||ORM^O01|${Math.random() * 10000}|D|2.4|||AL|NE\nPID|1||${patientId}||${patientLastName}^${patientFirstName}^^^^^L||${patientDoB}|${sex == "female" ? "F" : "M"}|||||||||||${patientOmang}\nORC|NW|${labOrderId}^LAB|||||^^^^^R||${labOrderDatetime}|||\nOBR|1| ${labOrderId}^LAB||${labOrderType}|R||${labOrderDatetime}|||||||||||`
-
-        // return template
     }
 
     private async generateResult(dataTypeHandler: any, dataContext: any, template: any) {

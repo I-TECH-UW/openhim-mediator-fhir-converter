@@ -164,7 +164,7 @@ WorkerUtils.workerTaskProcessor((msg) => {
                             });
                         };
 
-                        dataTypeHandler.parseSrcData(srcData)
+                        dataTypeHandler.parseSrcData(srcData, templateName)
                             .then((parsedData) => {
                                 var dataContext = { msg: parsedData };
                                 getTemplate(templateName)

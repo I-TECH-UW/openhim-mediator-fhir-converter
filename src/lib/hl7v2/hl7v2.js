@@ -13,7 +13,7 @@ module.exports = class hl7v2 extends dataHandler {
         super("hl7v2");
     }
 
-    parseSrcData(msg) {
+    parseSrcData(msg, templateName) {
         return new Promise((fulfill, reject) => {
 
             try{

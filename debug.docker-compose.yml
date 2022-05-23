@@ -20,7 +20,7 @@ services:
       - 9230:9229
     volumes:
       - ./config.json:/app/config.json
-    #entrypoint: node --experimental-worker --inspect-brk=0.0.0.0:9229 dist/index.js
+    entrypoint: node --experimental-worker --inspect-brk=0.0.0.0:9229 dist/index.js
     networks:
       - hie
     # tty: true

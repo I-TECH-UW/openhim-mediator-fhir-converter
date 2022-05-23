@@ -11,7 +11,7 @@ module.exports = class cda extends dataHandler {
         super("cda");
     }
 
-    parseSrcData(data) {
+    parseSrcData(data, templateName) {
         return new Promise((fulfill, reject) => {
             parseString(data, { trim: true, explicitCharkey :true, mergeAttrs: true, explicitArray:false }, function (err, result) {
                 if (err) {

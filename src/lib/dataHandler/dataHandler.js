@@ -11,7 +11,7 @@ module.exports = class dataHandler {
         this.dataType = dataType;
     }
 
-    parseSrcData(data) {
+    parseSrcData(data, templateName) {
         return new Promise((fulfill) => {
             fulfill(data);
         });

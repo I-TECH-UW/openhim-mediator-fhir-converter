@@ -9,7 +9,7 @@ let dataHandler = require('./dataHandler');
 describe('dataHandler', function () {
     it('should successfully parse any data.', function (done) {
         let data = 'abcd';
-        new dataHandler().parseSrcData('abcd')
+        new dataHandler().parseSrcData('abcd', '')
             .then(result => {
                 assert.equal(data, result);
                 done();

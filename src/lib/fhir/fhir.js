@@ -12,27 +12,28 @@ module.exports = class fhir extends dataHandler {
         super("fhir");
     }
 
-    parseSrcData(bundle, template) {
+    parseSrcData(bundle, templateName) {
         return new Promise((fulfill, reject) => {
-            let out = {fhir: {}}
+            let out = { fhir: {} }
             out._originalData = bundle
 
             try {
-                if(template && template.includes("ADT")) {
+                if (templateName && templateName.includes("ADT")) {
                     out.fhir = this.parseAdt(bundle)
-        
-                } else {
-                    out.fhir = this.parseObr(bundle)
-                }    
+
+                }
+                else if (templateName && templateName.includes("ORM")) {
+                    out.fhir = this.parseOrm(bundle);
+                }
 
                 out.fhir.controlId = uuid_1.v4().toString();
                 out.fhir.date = new Date().toISOString().slice(0, 10).split('-').join('')
-            } catch(error) {
+            } catch (error) {
                 let e = error;
                 reject(out)
                 console.log(`Could not parse Bundle!\n${e.message}\n${e.stack ? e.stack : ""}`)
             }
-            
+
             fulfill(out)
         })
     }
@@ -58,22 +59,45 @@ module.exports = class fhir extends dataHandler {
         let sourceOrganization = (bundle.entry.find(e => e.resource.resourceType == "Organization")).resource;
         let targetOrganization = (bundle.entry.reverse().find(e => e.resource.resourceType == "Organization")).resource;
         res.patientId = patient.id;
-        res.patientOmang = patient.identifier ? patient.identifier[0].value : "";
-        res.patientFirstName = patient.name && patient.name[0] && patient.name[0].given ? patient.name[0].given[0] : "";
-        res.patientLastName = patient.name && patient.name[0] && patient.name[0].family ? patient.name[0].family : "";
         res.patientDob = patient.birthDate.split('-').join('');
-        res.patientSex = patient.gender;
-        res.patientStreetAddress = "";
-        res.patientCity = "";
-        res.patientProvince = "";
-        res.patientPostalCode = "";
-        res.patientMaritalStatus = "";
-        res.patientHomePhoneNumber = "";
-        res.patientBusinessPhoneNumber = "";
-        res.patientEmail = "";
+        res.patientSex = patient.gender && patient.gender == 'male' ? "M" : "F";
+        
+        if(patient.address){
+            res.patientStreetAddress = patient.address.length > 0 && patient.address[0].line.length > 0 ? patient.address[0].line[0] : "";
+            res.patientCity = patient.address.length > 0 ? patient.address[0].city : "";
+            res.patientProvince = patient.address.length > 0 ? patient.address[0].state : "";
+            res.patientPostalCode = patient.address.length > 0 ? patient.address[0].postalCode : "";
+        }
+        res.patientMaritalStatus = patient.maritalStatus && patient.maritalStatus.coding.length > 0 ? patient.maritalStatus.coding[0].code : "";    
+
+        let q;
+        if(patient.telecom) {
+            q = patient.telecom.find(e => e.system == 'phone' && e.use == 'work')
+            res.patientBusinessPhoneNumber = q ? q.value : "";
+            q = patient.telecom.find(e => e.system == 'phone' && (e.use == 'mobile' || e.use == 'home'));
+            res.patientHomePhoneNumber = q ? q.value : "";
+            q = patient.telecom.find(e => e.system == 'email');
+            res.patientEmail = q ? q.value : "";    
+        }
+
+        if(patient.identifier) {
+            q = patient.identifier.find(i => i.system == 'http://moh.bw.org/ext/identifier/omang');
+            res.patientOmang = q ? q.value : "";    
+        }
+
+        if(patient.name) {
+            q = patient.name.find(n => n.use == 'official');
+            res.patientFirstName = q && q.given.length > 0 ? q.given[0] : "";
+            res.patientFamilyName = q ? q.family : "";
+        }
+
+        if(provider.name) {
+            q = provider.name.find(n => n.use == 'official');
+            res.providerLastName = q ? q.family : "";
+            res.providerFirstName =  q && q.given.length > 0 ? q.given[0] : "";    
+        }
+        
         res.providerId = provider ? provider.id : "";
-        res.providerLastName = provider.name && provider.name[0] && provider.name[0].family ? provider.name[0].family : "";
-        res.providerFirstName = provider.name && provider.name[0] && provider.name[0].given ? provider.name[0].given[0] : "";
         res.facilityId = sourceLocation ? sourceLocation.id : "";
         res.kinFamilyName = "";
         res.kinFirstName = "";
