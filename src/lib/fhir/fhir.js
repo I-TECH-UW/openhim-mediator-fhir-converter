@@ -109,7 +109,7 @@ module.exports = class fhir extends dataHandler {
         res.kinPostalCode = "";
         return res;
     }
-    parseObr(bundle) {
+    parseOrm(bundle) {
         let res = {};
         let patient = bundle.entry[1].resource;
         let serviceRequest = bundle.entry[4].resource;
