@@ -5,6 +5,7 @@ services:
     hostname: fhir-converter
     restart: unless-stopped
     build: ./
+    image: ghcr.io/b-techbw/openhim-mediator-fhir-converter:local
     ports:
       - "2019:2019"
     volumes:

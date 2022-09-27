@@ -76,10 +76,6 @@
                 {{/if}},
             },
         },
-        "interpretation":
-        [
-            { {{>DataType/CWECodeableConcept.hbs mapping="CodeSystem/InterpretationCode.hbs" CWE=OBX-8}} },
-        ],
         "status":{{>DataType/_string.hbs mapping="CodeSystem/ObservationStatus.hbs" inCode=OBX-11 }},
         "effectiveDateTime":"{{formatAsDateTime OBX-14}}",
         "method":

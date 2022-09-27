@@ -58,6 +58,48 @@ module.exports = class fhir extends dataHandler {
         let targetLocation = (bundle.entry.reverse().find(e => e.resource.resourceType == "Location")).resource;
         let sourceOrganization = (bundle.entry.find(e => e.resource.resourceType == "Organization")).resource;
         let targetOrganization = (bundle.entry.reverse().find(e => e.resource.resourceType == "Organization")).resource;
+        
+        res = this.setPatientData(patient, res);
+
+        let q;
+
+        if(provider.name) {
+            q = provider.name.find(n => n.use == 'official');
+            res.providerLastName = q ? q.family : "";
+            res.providerFirstName =  q && q.given.length > 0 ? q.given[0] : "";    
+        }
+        
+        res.providerId = provider ? provider.id : "";
+        res.facilityId = sourceLocation ? sourceLocation.id : "";
+        res.kinFamilyName = "";
+        res.kinFirstName = "";
+        res.kinRelCode = "";
+        res.kinRelation = "";
+        res.kinStreetAddress = "";
+        res.kinCity = "";
+        res.kinProvince = "";
+        res.kinPostalCode = "";
+        return res;
+    }
+    parseOrm(bundle) {
+        let res = {};
+        let patient = (bundle.entry.find(e => e.resource.resourceType == "Patient")).resource;
+        let serviceRequest = (bundle.entry.find(e => e.resource.resourceType == "ServiceRequest" && e.resource.basedOn)).resource;
+        let task = (bundle.entry.find(e => e.resource.resourceType == "Task")).resource;
+        let org = (bundle.entry.find(e => e.resource.resourceType == "Organization")).resource;
+
+        res = this.setPatientData(patient, res);
+        res.labOrderId = task.identifier ? task.identifier[0].value : "";
+        res.labOrderDatetime = serviceRequest.authoredOn ? serviceRequest.authoredOn.split('-').join('') : "";
+        if(serviceRequest.code && serviceRequest.code.coding && serviceRequest.code.coding.length > 0) {
+            let ipmsCode = serviceRequest.code.coding.find(e => e.system == "https://api.openconceptlab.org/orgs/B-TECHBW/sources/IPMS-LAB-TEST/")
+            res.labOrderType = ipmsCode && ipmsCode.code ? ipmsCode.code : "";
+        }
+        
+        return res;
+    }
+
+    setPatientData(patient, res) { 
         res.patientId = patient.id;
         res.patientDob = patient.birthDate.split('-').join('');
         res.patientSex = patient.gender && patient.gender == 'male' ? "M" : "F";
@@ -90,39 +132,13 @@ module.exports = class fhir extends dataHandler {
             res.patientFirstName = q && q.given.length > 0 ? q.given[0] : "";
             res.patientFamilyName = q ? q.family : "";
         }
-
-        if(provider.name) {
-            q = provider.name.find(n => n.use == 'official');
-            res.providerLastName = q ? q.family : "";
-            res.providerFirstName =  q && q.given.length > 0 ? q.given[0] : "";    
-        }
         
-        res.providerId = provider ? provider.id : "";
-        res.facilityId = sourceLocation ? sourceLocation.id : "";
-        res.kinFamilyName = "";
-        res.kinFirstName = "";
-        res.kinRelCode = "";
-        res.kinRelation = "";
-        res.kinStreetAddress = "";
-        res.kinCity = "";
-        res.kinProvince = "";
-        res.kinPostalCode = "";
-        return res;
-    }
-    parseOrm(bundle) {
-        let res = {};
-        let patient = bundle.entry[1].resource;
-        let serviceRequest = bundle.entry[4].resource;
-        res.patientId = patient.id;
         res.patientOmang = patient.identifier[0].value;
         res.patientFirstName = patient.name[0].given[0];
         res.patientLastName = patient.name[0].family;
         res.patientDoB = patient.birthDate.split('-').join('');
         res.sex = patient.gender;
-        res.labOrderId = serviceRequest.identifier ? serviceRequest.identifier[0].value : "";
-        res.labOrderDatetime = serviceRequest.authoredOn ? serviceRequest.authoredOn.split('-').join('') : "";
-        res.labOrderType = serviceRequest.code.coding[0].code;
+        
         return res;
     }
-
 };

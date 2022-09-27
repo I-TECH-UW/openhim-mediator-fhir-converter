@@ -14,13 +14,15 @@ services:
     container_name: built-fhir-converter
     hostname: fhir-converter
     restart: unless-stopped
+    image: ghcr.io/b-techbw/openhim-mediator-fhir-converter:local
     build: ./
     ports:
       - 2019:2019
       - 9230:9229
     volumes:
       - ./config.json:/app/config.json
-    entrypoint: node --experimental-worker --inspect-brk=0.0.0.0:9229 dist/index.js
+      # - ./debug-service-templates:/app/data/service-templates
+    entrypoint: ./deploy/debug.sh
     networks:
       - hie
     # tty: true
