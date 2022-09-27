@@ -16,7 +16,7 @@ const MAX_TEST_TIME = 10000;
 const API_KEY_HEADER = "X-MS-CONVERSION-API-KEY";
 const API_KEY = 'this_is_a_fake_app_key';
 
-describe('Regression test - FHIR data validation', () => {
+describe.skip('Regression test - FHIR data validation', () => {
     const app = routes(express());
     const allCases = cases.cdaCases.concat(cases.hl7v2Cases);
     before(() => app.setValidApiKeys([ API_KEY ]));

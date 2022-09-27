@@ -11,6 +11,8 @@ describe('translateBundle',
     })
 
     it('should return a HL7v2 Message', async () => { 
+      jest.setTimeout(100000);
+
       let testBundle: R4.IBundle = await got.get("https://b-techbw.github.io/bw-lab-ig/Bundle-example-bw-lab-bundle.json").json();
 
       let fc = new FhirConverter(testBundle, 'ADT_A04_TO_IPMS.hbs');
