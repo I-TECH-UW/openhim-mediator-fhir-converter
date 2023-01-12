@@ -1,6 +1,6 @@
 {{#with msg.fhir}}
 MSH|^~&|PIMS||IPMS||{{date}}||ORM^O01|{{controlId}}|D|2.4|||AL|NE
-PID|1||{{medicalRecordNumber}}^^^^MR^GGC~{{patientOmang}}^^^^SS^GGC~{{patientIdentifier}}^^^^PI^GGC~{{unknownIdentifier}}^^^^HUB^GGC||{{patientLastName}}^{{patientFirstName}}||{{patientDoB}}|{{sex}}||CT|{{patientStreetAddress}}^^{{patientCity}}^{{patientProvince}}^{{patientPostalCode}}||{{patientBusinessPhoneNumber}}|||S|||{{patientOmang}}|
+PID|1||{{medicalRecordNumber}}^^^^MR^GGC~{{patientOmang}}^^^^SS^GGC~{{patientIdentifier}}^^^^PI^GGC~{{unknownIdentifier}}^^^^HUB^GGC||{{patientLastName}}^{{patientFirstName}}||{{patientDoB}}|{{sex}}||CT|{{patientStreetAddress}}^^{{patientCity}}^{{patientProvince}}^{{patientPostalCode}}||{{patientBusinessPhoneNumber}}|||{{maritalStatus}}||{{patientAccountNumber}}|
 ORC|NW|{{labOrderId}}^LAB|{{medicalRecordNumber}}||||^^^^^R||{{labOrderDatetime}}|||
 OBR|1|{{labOrderId}}^LAB||{{labOrderType}}|
 {{/with}}

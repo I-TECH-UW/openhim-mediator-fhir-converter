@@ -8,6 +8,7 @@ WORKDIR /app
 COPY ./package.json /app 
 COPY ./.eslintrc.js /app
 COPY ./tsconfig.json /app
+COPY ./yarn.lock /app
 
 RUN yarn install --network-timeout 1000000
 

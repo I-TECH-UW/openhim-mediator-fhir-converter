@@ -29,7 +29,21 @@
                     "system": "http://hl7.org/fhir/sid/us-ssn",
                     "value": "{{PID-19}}"
                 },
-            {{/if}}
+            {{/if}},
+            {{#if PID-18}}
+                {
+                    "type": {
+                        "coding": [
+                            {
+                                "system": "http://moh.bw.org/ext/identifier/acc",
+                                "code": "AC"
+                            }
+                        ]
+                    },
+                    "system": "http://moh.bw.org/ext/identifier/acc",
+                    "value": "{{PID-18}}"
+                },
+            {{/if}},
             {
                 {{>DataType/DLN.hbs DLN=PID-20}},
             },
@@ -43,7 +57,7 @@
                 {{>DataType/XPN.hbs XPN=PID-9}},
             },
         ],
-        "birthDate":"",
+        "birthDate":"{{addHyphensDate PID-7}}",
         "gender":{{>DataType/_string.hbs mapping="CodeSystem/Gender.hbs" inCode=PID-8 }},
         "address":
         [
