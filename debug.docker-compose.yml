@@ -22,7 +22,7 @@ services:
     volumes:
       - ./config.json:/app/config.json
       - ./data/templates:/app/data/service-templates
-    entrypoint: ./deploy/debug.sh
+    # entrypoint: ./deploy/debug.sh
     networks:
       - hie
     # tty: true
