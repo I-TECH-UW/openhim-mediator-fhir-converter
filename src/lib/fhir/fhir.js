@@ -124,7 +124,19 @@ module.exports = class fhir extends dataHandler {
 
         if(patient.identifier) {
             q = patient.identifier.find(i => i.system == 'http://moh.bw.org/ext/identifier/omang');
-            res.patientOmang = q ? q.value : "";    
+            res.patientOmang = q ? q.value : "";
+            
+            q = patient.identifier.find(i => i.system == 'http://moh.bw.org/ext/identifier/mr');
+            res.medicalRecordNumber = q ? q.value : "";
+
+            q = patient.identifier.find(i => i.system == 'http://moh.bw.org/ext/identifier/acc');
+            res.patientAccountNumber = q ? q.value : "";
+
+            q = patient.identifier.find(i => i.system == 'http://moh.bw.org/ext/identifier/pi');
+            res.patientIdentifier = q ? q.value : "";
+
+            q = patient.identifier.find(i => i.system == 'http://moh.bw.org/ext/identifier/unknown' && i.value);
+            res.unknownIdentifier = q ? q.value : "";
         }
 
         if(patient.name) {
@@ -133,7 +145,6 @@ module.exports = class fhir extends dataHandler {
             res.patientFamilyName = q ? q.family : "";
         }
         
-        res.patientOmang = patient.identifier[0].value;
         res.patientFirstName = patient.name[0].given[0];
         res.patientLastName = patient.name[0].family;
         res.patientDoB = patient.birthDate.split('-').join('');

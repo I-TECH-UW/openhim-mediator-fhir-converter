@@ -18,11 +18,11 @@ services:
     build: ./
     ports:
       - 2019:2019
-      - 9230:9229
+      - 9229:9229
     volumes:
       - ./config.json:/app/config.json
-      # - ./debug-service-templates:/app/data/service-templates
-    entrypoint: ./deploy/debug.sh
+      - ./data/templates:/app/data/service-templates
+    # entrypoint: ./deploy/debug.sh
     networks:
       - hie
     # tty: true
