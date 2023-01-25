@@ -52,24 +52,28 @@ module.exports = class fhir extends dataHandler {
     }
 
     getResource(bundle, resourceName) {
-        try {
-            let entry = bundle.entry.find(e => e.resource.resourceType == resourceName)
-            return (entry && entry.resource) ? entry.resource : null
-        } catch (e) {
-            logger.error(`Can't get ${resourceName} from \n${JSON.stringify(bundle)}`)
-            return null
-        }
+        let entry = bundle.entry.find(e => e.resource.resourceType == resourceName)
+        return (entry && entry.resource) ? entry.resource : null
     }
 
     parseAdt(bundle) {
         let res = {};
         let patient = this.getResource(bundle, "Patient");
-        let sourceLocation = this.getResource(bundle, "Location");
         let provider = this.getResource(bundle, "Practitioner");;
+        let sourceLocation = this.getResource(bundle, "Location");
+
+        res = this.setPatientData(patient, res);
 
         res = this.setPatientData(patient, res);
         res = this.setProviderData(provider, res);
 
+        if(provider && provider.name) {
+            q = provider.name.find(n => n.use == 'official');
+            res.providerLastName = q ? q.family : "";
+            res.providerFirstNames =  q && q.given.length > 0 ? q.given : [""];    
+        }
+        
+        res.providerId = provider ? provider.id : "";
         res.facilityId = sourceLocation ? sourceLocation.id : "";
         res.kinFamilyName = "";
         res.kinFirstName = "";
@@ -154,8 +158,8 @@ module.exports = class fhir extends dataHandler {
             res.unknownIdentifier = q ? q.value : "";
         }
 
-        res.patientFirstName = [""]
-        res.patientFamilyName = ""
+        res.patientFirstName = ""
+        res.patientFamilyName = [""]
         if(patient && patient.name && patient.name.length > 0) {
             q = patient.name.find(n => n.use == 'official');
             if(!q) {
@@ -167,20 +171,6 @@ module.exports = class fhir extends dataHandler {
         
         res.patientDoB = patient.birthDate ? patient.birthDate.split('-').join('') : "";
         res.sex = patient.gender ? patient.gender : "";
-        
-        return res;
-    }
-
-    setProviderData(provider, res) {
-        let q;
-
-        if(provider && provider.name) {
-            q = provider.name.find(n => n.use == 'official');
-            res.providerLastName = q ? q.family : "";
-            res.providerFirstNames =  q && q.given.length > 0 ? q.given : [""];    
-        }
-        
-        res.providerId = provider ? provider.id : "";
         
         return res;
     }
