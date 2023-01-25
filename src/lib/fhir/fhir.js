@@ -50,23 +50,25 @@ module.exports = class fhir extends dataHandler {
         return super.getConversionResultMetadata(context);
     }
 
+    getResource(bundle, resourceName) {
+        let entry = bundle.entry.find(e => e.resource.resourceType == resourceName)
+        return (entry && entry.resource) ? entry.resource : null
+    }
+
     parseAdt(bundle) {
         let res = {};
-        let patient = (bundle.entry.find(e => e.resource.resourceType == "Patient")).resource;
-        let provider = (bundle.entry.find(e => e.resource.resourceType == "Practitioner")).resource;
-        let sourceLocation = (bundle.entry.find(e => e.resource.resourceType == "Location")).resource;
-        let targetLocation = (bundle.entry.reverse().find(e => e.resource.resourceType == "Location")).resource;
-        let sourceOrganization = (bundle.entry.find(e => e.resource.resourceType == "Organization")).resource;
-        let targetOrganization = (bundle.entry.reverse().find(e => e.resource.resourceType == "Organization")).resource;
-        
+        let patient = this.getResource(bundle, "Patient");
+        let provider = this.getResource(bundle, "Practitioner");;
+        let sourceLocation = this.getResource(bundle, "Location");
+
         res = this.setPatientData(patient, res);
 
         let q;
 
-        if(provider.name) {
+        if(provider && provider.name) {
             q = provider.name.find(n => n.use == 'official');
             res.providerLastName = q ? q.family : "";
-            res.providerFirstName =  q && q.given.length > 0 ? q.given[0] : "";    
+            res.providerFirstNames =  q && q.given.length > 0 ? q.given : [""];    
         }
         
         res.providerId = provider ? provider.id : "";
@@ -139,16 +141,19 @@ module.exports = class fhir extends dataHandler {
             res.unknownIdentifier = q ? q.value : "";
         }
 
-        if(patient.name) {
+        res.patientFirstName = ""
+        res.patientFamilyName = [""]
+        if(patient && patient.name && patient.name.length > 0) {
             q = patient.name.find(n => n.use == 'official');
-            res.patientFirstName = q && q.given.length > 0 ? q.given[0] : "";
+            if(!q) {
+                q = patient.name[0] 
+            }    
+            res.patientFirstName = q && q.given.length > 0 ? q.given : [""];
             res.patientFamilyName = q ? q.family : "";
         }
         
-        res.patientFirstName = patient.name[0].given[0];
-        res.patientLastName = patient.name[0].family;
-        res.patientDoB = patient.birthDate.split('-').join('');
-        res.sex = patient.gender;
+        res.patientDoB = patient.birthDate ? patient.birthDate.split('-').join('') : "";
+        res.sex = patient.gender ? patient.gender : "";
         
         return res;
     }
