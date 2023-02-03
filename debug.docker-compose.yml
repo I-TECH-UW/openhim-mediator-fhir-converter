@@ -22,6 +22,7 @@ services:
     volumes:
       - ./config.json:/app/config.json
       - ./package.json:/app/package.json
+      - ./data/templates:/app/data/service-templates
     entrypoint: /app/deploy/debug.sh
     networks:
       - hie

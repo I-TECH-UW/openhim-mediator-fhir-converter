@@ -59,21 +59,12 @@ module.exports = class fhir extends dataHandler {
     parseAdt(bundle) {
         let res = {};
         let patient = this.getResource(bundle, "Patient");
-        let provider = this.getResource(bundle, "Practitioner");;
         let sourceLocation = this.getResource(bundle, "Location");
-
-        res = this.setPatientData(patient, res);
+        let provider = this.getResource(bundle, "Practitioner");;
 
         res = this.setPatientData(patient, res);
         res = this.setProviderData(provider, res);
 
-        if(provider && provider.name) {
-            q = provider.name.find(n => n.use == 'official');
-            res.providerLastName = q ? q.family : "";
-            res.providerFirstNames =  q && q.given.length > 0 ? q.given : [""];    
-        }
-        
-        res.providerId = provider ? provider.id : "";
         res.facilityId = sourceLocation ? sourceLocation.id : "";
         res.kinFamilyName = "";
         res.kinFirstName = "";
@@ -87,12 +78,12 @@ module.exports = class fhir extends dataHandler {
     }
     parseOrm(bundle) {
         let res = {};
-        let patient = this.getResource(bundle, "Patient");
+        let patient = (bundle.entry.find(e => e.resource.resourceType == "Patient")).resource;
         let provider = this.getResource(bundle, "Practitioner");;
 
-        let serviceRequest = this.getResource(bundle, "ServiceRequest");
-        let task = this.getResource(bundle, "Task");
-        let org = this.getResource(bundle, "Organization");
+        let serviceRequest = (bundle.entry.find(e => e.resource.resourceType == "ServiceRequest" && e.resource.code)).resource;
+        let task = (bundle.entry.find(e => e.resource.resourceType == "Task")).resource;
+        let org = (bundle.entry.find(e => e.resource.resourceType == "Organization")).resource;
         let sourceLocation = this.getResource(bundle, "Location");
 
         res = this.setPatientData(patient, res);
@@ -110,7 +101,7 @@ module.exports = class fhir extends dataHandler {
         }
     
         if(serviceRequest.code && serviceRequest.code.coding && serviceRequest.code.coding.length > 0) {
-            let ipmsCode = serviceRequest.code.coding.find(e => e.system == "https://api.openconceptlab.org/orgs/I-TECH-UW/sources/IPMSLAB/")
+            let ipmsCode = serviceRequest.code.coding.find(e => e.system == "https://api.openconceptlab.org/orgs/B-TECHBW/sources/IPMS-LAB-TEST/")
             res.labOrderMnemonic = ipmsCode && ipmsCode.code ? ipmsCode.code : "";
             res.labOrderName = ipmsCode && ipmsCode.display ? ipmsCode.display : "";
         }
@@ -158,8 +149,8 @@ module.exports = class fhir extends dataHandler {
             res.unknownIdentifier = q ? q.value : "";
         }
 
-        res.patientFirstName = ""
-        res.patientFamilyName = [""]
+        res.patientFirstName = [""]
+        res.patientFamilyName = ""
         if(patient && patient.name && patient.name.length > 0) {
             q = patient.name.find(n => n.use == 'official');
             if(!q) {
@@ -171,6 +162,20 @@ module.exports = class fhir extends dataHandler {
         
         res.patientDoB = patient.birthDate ? patient.birthDate.split('-').join('') : "";
         res.sex = patient.gender ? patient.gender : "";
+        
+        return res;
+    }
+
+    setProviderData(provider, res) {
+        let q;
+
+        if(provider && provider.name) {
+            q = provider.name.find(n => n.use == 'official');
+            res.providerLastName = q ? q.family : "";
+            res.providerFirstNames =  q && q.given.length > 0 ? q.given : [""];    
+        }
+        
+        res.providerId = provider ? provider.id : "";
         
         return res;
     }
