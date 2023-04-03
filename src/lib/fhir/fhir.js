@@ -52,8 +52,13 @@ module.exports = class fhir extends dataHandler {
     }
 
     getResource(bundle, resourceName) {
-        let entry = bundle.entry.find(e => e.resource.resourceType == resourceName)
-        return (entry && entry.resource) ? entry.resource : null
+        try {
+            let entry = bundle.entry.find(e => e.resource.resourceType == resourceName)
+            return (entry && entry.resource) ? entry.resource : null
+        } catch (e) {
+            logger.error(`Can't get ${resourceName} from \n${JSON.stringify(bundle)}`)
+            return null
+        }
     }
 
     parseAdt(bundle) {
@@ -78,12 +83,12 @@ module.exports = class fhir extends dataHandler {
     }
     parseOrm(bundle) {
         let res = {};
-        let patient = (bundle.entry.find(e => e.resource.resourceType == "Patient")).resource;
+        let patient = this.getResource(bundle, "Patient");
         let provider = this.getResource(bundle, "Practitioner");;
 
-        let serviceRequest = (bundle.entry.find(e => e.resource.resourceType == "ServiceRequest" && e.resource.code)).resource;
-        let task = (bundle.entry.find(e => e.resource.resourceType == "Task")).resource;
-        let org = (bundle.entry.find(e => e.resource.resourceType == "Organization")).resource;
+        let serviceRequest = this.getResource(bundle, "ServiceRequest");
+        let task = this.getResource(bundle, "Task");
+        let org = this.getResource(bundle, "Organization");
         let sourceLocation = this.getResource(bundle, "Location");
 
         res = this.setPatientData(patient, res);
