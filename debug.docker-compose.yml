@@ -21,8 +21,8 @@ services:
       - 9229:9229
     volumes:
       - ./config.json:/app/config.json
-      - ./data/templates:/app/data/service-templates
-    # entrypoint: ./deploy/debug.sh
+      - ./package.json:/app/package.json
+    entrypoint: /app/deploy/debug.sh
     networks:
       - hie
     # tty: true

@@ -1,6 +1,6 @@
 {{#with msg.fhir}}
 MSH|^~\&|LAB||LAB||{{date}}||ORM^O01|{{controlId}}|D|2.4|||AL|NE|
-PID|1||{{medicalRecordNumber}}^^^^MR^GGC~{{patientOmang}}^^^^SS^GGC~{{patientIdentifier}}^^^^PI^GGC~{{unknownIdentifier}}^^^^HUB^GGC||{{patientLastName}}^{{patientFirstName}}^^^^^L||{{patientDoB}}|{{sex}}||CT|{{patientStreetAddress}}^^{{patientCity}}^{{patientProvince}}^{{patientPostalCode}}||{{patientBusinessPhoneNumber}}|||{{maritalStatus}}||{{patientAccountNumber}}|
-ORC|NW|{{labOrderId}}^LAB|{{medicalRecordNumber}}||||^^^^^R||{{labOrderDatetime}}|||
-OBR|1|{{labOrderId}}^LAB||{{labOrderType}}|
+PID|1||{{medicalRecordNumber}}^^^^MR^GGC~{{patientOmang}}^^^^SS^GGC~{{patientIdentifier}}^^^^PI^GGC~{{unknownIdentifier}}^^^^HUB^GGC||{{patientFamilyName}}^{{patientFirstName.[0]}}^^^^^L||{{patientDoB}}|{{sex}}||CT|{{patientStreetAddress}}^^{{patientCity}}^{{patientProvince}}^{{patientPostalCode}}||{{patientBusinessPhoneNumber}}|||{{maritalStatus}}||{{patientAccountNumber}}|
+ORC|NW|{{labOrderId}}^LAB|{{medicalRecordNumber}}||FINAL||^^^^^R^||{{labOrderDatetime}}|||
+OBR|1|{{labOrderId}}^LAB||{{labOrderMnemonic}}^{{labOrderName}}|R|{{labOrderDatetime}}|{{labOrderDatetime}}|||||||^^|{{providerId}}^{{providerLastName}}^{{providerFirstName.[0]}}^^^^^||
 {{/with}}

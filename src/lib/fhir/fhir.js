@@ -3,6 +3,7 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
+const { now } = require("fp-ts/lib/Date");
 const uuid_1 = require("uuid");
 
 let dataHandler = require('../dataHandler/dataHandler');
@@ -50,26 +51,25 @@ module.exports = class fhir extends dataHandler {
         return super.getConversionResultMetadata(context);
     }
 
+    getResource(bundle, resourceName) {
+        try {
+            let entry = bundle.entry.find(e => e.resource.resourceType == resourceName)
+            return (entry && entry.resource) ? entry.resource : null
+        } catch (e) {
+            logger.error(`Can't get ${resourceName} from \n${JSON.stringify(bundle)}`)
+            return null
+        }
+    }
+
     parseAdt(bundle) {
         let res = {};
-        let patient = (bundle.entry.find(e => e.resource.resourceType == "Patient")).resource;
-        let provider = (bundle.entry.find(e => e.resource.resourceType == "Practitioner")).resource;
-        let sourceLocation = (bundle.entry.find(e => e.resource.resourceType == "Location")).resource;
-        let targetLocation = (bundle.entry.reverse().find(e => e.resource.resourceType == "Location")).resource;
-        let sourceOrganization = (bundle.entry.find(e => e.resource.resourceType == "Organization")).resource;
-        let targetOrganization = (bundle.entry.reverse().find(e => e.resource.resourceType == "Organization")).resource;
-        
+        let patient = this.getResource(bundle, "Patient");
+        let sourceLocation = this.getResource(bundle, "Location");
+        let provider = this.getResource(bundle, "Practitioner");;
+
         res = this.setPatientData(patient, res);
+        res = this.setProviderData(provider, res);
 
-        let q;
-
-        if(provider.name) {
-            q = provider.name.find(n => n.use == 'official');
-            res.providerLastName = q ? q.family : "";
-            res.providerFirstName =  q && q.given.length > 0 ? q.given[0] : "";    
-        }
-        
-        res.providerId = provider ? provider.id : "";
         res.facilityId = sourceLocation ? sourceLocation.id : "";
         res.kinFamilyName = "";
         res.kinFirstName = "";
@@ -83,17 +83,32 @@ module.exports = class fhir extends dataHandler {
     }
     parseOrm(bundle) {
         let res = {};
-        let patient = (bundle.entry.find(e => e.resource.resourceType == "Patient")).resource;
-        let serviceRequest = (bundle.entry.find(e => e.resource.resourceType == "ServiceRequest" && e.resource.basedOn)).resource;
-        let task = (bundle.entry.find(e => e.resource.resourceType == "Task")).resource;
-        let org = (bundle.entry.find(e => e.resource.resourceType == "Organization")).resource;
+        let patient = this.getResource(bundle, "Patient");
+        let provider = this.getResource(bundle, "Practitioner");;
+
+        let serviceRequest = this.getResource(bundle, "ServiceRequest");
+        let task = this.getResource(bundle, "Task");
+        let org = this.getResource(bundle, "Organization");
+        let sourceLocation = this.getResource(bundle, "Location");
 
         res = this.setPatientData(patient, res);
+        res = this.setProviderData(provider, res);
+
+        res.facilityId = sourceLocation ? sourceLocation.id : "";
         res.labOrderId = task.identifier ? task.identifier[0].value : "";
-        res.labOrderDatetime = serviceRequest.authoredOn ? serviceRequest.authoredOn.split('-').join('') : "";
+        let orderDateTime = new Date()
+        try {
+            orderDateTime = serviceRequest.authoredOn ? new Date(serviceRequest.authoredOn) : (task.authoredOn ? new Date(task.authoredOn) : orderDateTime)
+            res.labOrderDatetime = orderDateTime ? orderDateTime.getFullYear().toString()+(orderDateTime.getMonth()+1).toString().padStart(2, '0')+orderDateTime.getDate().toString().padStart(2, '0')+orderDateTime.getHours().toString().padStart(2, '0')+orderDateTime.getMinutes().toString().padStart(2, '0')+orderDateTime.getSeconds().toString().padStart(2, '0') : "";
+        } catch(e) {
+            console.error(e);
+            res.labOrderDatetime = ""
+        }
+    
         if(serviceRequest.code && serviceRequest.code.coding && serviceRequest.code.coding.length > 0) {
-            let ipmsCode = serviceRequest.code.coding.find(e => e.system == "https://api.openconceptlab.org/orgs/B-TECHBW/sources/IPMS-LAB-TEST/")
-            res.labOrderType = ipmsCode && ipmsCode.code ? ipmsCode.code : "";
+            let ipmsCode = serviceRequest.code.coding.find(e => e.system == "https://api.openconceptlab.org/orgs/I-TECH-UW/sources/IPMSLAB/")
+            res.labOrderMnemonic = ipmsCode && ipmsCode.code ? ipmsCode.code : "";
+            res.labOrderName = ipmsCode && ipmsCode.display ? ipmsCode.display : "";
         }
         
         return res;
@@ -139,17 +154,35 @@ module.exports = class fhir extends dataHandler {
             res.unknownIdentifier = q ? q.value : "";
         }
 
-        if(patient.name) {
+        res.patientFirstName = [""]
+        res.patientFamilyName = ""
+        if(patient && patient.name && patient.name.length > 0) {
             q = patient.name.find(n => n.use == 'official');
-            res.patientFirstName = q && q.given.length > 0 ? q.given[0] : "";
+            if(!q) {
+                q = patient.name[0] 
+            }    
+            res.patientFirstName = q && q.given.length > 0 ? q.given : [""];
             res.patientFamilyName = q ? q.family : "";
         }
         
-        res.patientFirstName = patient.name[0].given[0];
-        res.patientLastName = patient.name[0].family;
-        res.patientDoB = patient.birthDate.split('-').join('');
-        res.sex = patient.gender;
+        res.patientDoB = patient.birthDate ? patient.birthDate.split('-').join('') : "";
+        res.sex = patient.gender ? patient.gender : "";
         
         return res;
     }
+
+    setProviderData(provider, res) {
+        let q;
+
+        if(provider && provider.name) {
+            q = provider.name.find(n => n.use == 'official');
+            res.providerLastName = q ? q.family : "";
+            res.providerFirstNames =  q && q.given.length > 0 ? q.given : [""];    
+        }
+        
+        res.providerId = provider ? provider.id : "";
+        
+        return res;
+    }
+
 };
