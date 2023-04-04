@@ -106,7 +106,7 @@ module.exports = class fhir extends dataHandler {
         }
     
         if(serviceRequest.code && serviceRequest.code.coding && serviceRequest.code.coding.length > 0) {
-            let ipmsCode = serviceRequest.code.coding.find(e => e.system == "https://api.openconceptlab.org/orgs/B-TECHBW/sources/IPMS-LAB-TEST/")
+            let ipmsCode = serviceRequest.code.coding.find(e => e.system == "https://api.openconceptlab.org/orgs/I-TECH-UW/sources/IPMSLAB/")
             res.labOrderMnemonic = ipmsCode && ipmsCode.code ? ipmsCode.code : "";
             res.labOrderName = ipmsCode && ipmsCode.display ? ipmsCode.display : "";
         }
