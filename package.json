@@ -17,7 +17,7 @@
     "pretest": "node --experimental-worker dist/init-service.js",
     "prestart": "node --experimental-worker dist/init-service.js",
     "start": "node --experimental-worker dist/index.js",
-    "debug": "node --experimental-worker --inspect=0.0.0.0:9229 dist/index.js",
+    "debug": "node --experimental-worker --inspect-brk=0.0.0.0:9229 dist/index.js",
     "eslint": "eslint {src,test}/**/*.js"
   },
   "eslintConfig": {

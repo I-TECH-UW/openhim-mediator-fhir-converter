@@ -56,21 +56,65 @@ module.exports = class fhir extends dataHandler {
             let entry = bundle.entry.find(e => e.resource.resourceType == resourceName)
             return (entry && entry.resource) ? entry.resource : null
         } catch (e) {
-            logger.error(`Can't get ${resourceName} from \n${JSON.stringify(bundle)}`)
+            console.log(`Can't get ${resourceName} from \n${JSON.stringify(bundle)}`)
             return null
         }
+    }
+
+    getSourceLocation(bundle) {
+        try {
+            let task = this.getResource(bundle, "Task")
+            const sourceLocationId = task.requester ? task.requester.reference.split('/')[1] : null
+
+            let sourceLocation = bundle.entry.find(e => e.resource.resourceType == "Location" && e.resource.id == sourceLocationId)
+            if(sourceLocation && sourceLocation.resource) {
+                return sourceLocation.resource.name
+            }
+        } catch (error) {
+            console.log(`Can't get source location from \n${JSON.stringify(bundle)}`)
+        }
+        return null
+    }
+
+    /** Set IPMS-specific location mappings */
+    setIpmsLocationInformation(bundle, res) {
+        try {
+            let task = this.getResource(bundle, "Task")
+            const targetLocationId = task.location ? task.location.reference.split('/')[1] : null
+
+            let targetLocation = bundle.entry.find(e => e.resource.resourceType == "Location" && e.resource.id == targetLocationId)
+            if(targetLocation && targetLocation.resource) {
+                let target = targetLocation.resource
+                let provider = target.extension.find(e => e && e.url && e.url.includes("ipms-provider") && e.valueString)
+                let patientType = target.extension.find(e => e && e.url && e.url.includes("ipms-patient-type") && e.valueString)
+                let patientStatus = target.extension.find(e => e && e.url && e.url.includes("ipms-patient-status") && e.valueString)
+                let ipmsXlocation = target.extension.find(e => e && e.url && e.url.includes("ipms-xlocation") && e.valueString)
+
+                res.targetFacility = {
+                    name: target.name,
+                    provider: provider ? provider.valueString : "",
+                    patientType: patientType ? patientType.valueString : "",
+                    patientStatus: patientStatus ? patientStatus.valueString : "",
+                    ipmsXlocation: ipmsXlocation ? ipmsXlocation.valueString : ""
+                }
+            }
+        } catch (error) {
+            console.log(`Can't get target location information from \n${JSON.stringify(bundle)}`)
+        }
+        return res
     }
 
     parseAdt(bundle) {
         let res = {};
         let patient = this.getResource(bundle, "Patient");
-        let sourceLocation = this.getResource(bundle, "Location");
-        let provider = this.getResource(bundle, "Practitioner");;
+        let sourceLocation = this.getSourceLocation(bundle);
+        let provider = this.getResource(bundle, "Practitioner");
 
         res = this.setPatientData(patient, res);
         res = this.setProviderData(provider, res);
+        res = this.setIpmsLocationInformation(bundle, res);
 
-        res.facilityId = sourceLocation ? sourceLocation.id : "";
+        res.facilityId = sourceLocation ? sourceLocation : "";
         res.kinFamilyName = "";
         res.kinFirstName = "";
         res.kinRelCode = "";
@@ -79,6 +123,7 @@ module.exports = class fhir extends dataHandler {
         res.kinCity = "";
         res.kinProvince = "";
         res.kinPostalCode = "";
+
         return res;
     }
     parseOrm(bundle) {
@@ -119,12 +164,13 @@ module.exports = class fhir extends dataHandler {
         res.patientDob = patient.birthDate.split('-').join('');
         res.patientSex = patient.gender && patient.gender == 'male' ? "M" : "F";
         
-        if(patient.address){
-            res.patientStreetAddress = patient.address.length > 0 && patient.address[0].line.length > 0 ? patient.address[0].line[0] : "";
-            res.patientCity = patient.address.length > 0 ? patient.address[0].city : "";
-            res.patientProvince = patient.address.length > 0 ? patient.address[0].state : "";
-            res.patientPostalCode = patient.address.length > 0 ? patient.address[0].postalCode : "";
+        if(patient.address && patient.address.length > 0){
+            res.patientStreetAddress = patient.address[0].line && patient.address[0].line.length > 0 ? patient.address[0].line[0] : "";
+            res.patientCity = patient.address[0].city || "";
+            res.patientProvince = patient.address[0].state || "";
+            res.patientPostalCode = patient.address[0].postalCode || "";
         }
+        
         res.patientMaritalStatus = patient.maritalStatus && patient.maritalStatus.coding.length > 0 ? patient.maritalStatus.coding[0].code : "";    
 
         let q;

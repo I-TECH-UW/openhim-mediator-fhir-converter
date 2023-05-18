@@ -22,7 +22,7 @@ services:
     volumes:
       - ./config.json:/app/config.json
       - ./package.json:/app/package.json
-    entrypoint: /app/deploy/debug.sh
+    entrypoint: /app/deploy/debwug.sh
     networks:
       - hie
     # tty: true
