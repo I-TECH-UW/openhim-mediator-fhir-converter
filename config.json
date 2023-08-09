@@ -10,7 +10,7 @@
   "mediator": {
     "api": {
       "username": "root@openhim.org",
-      "password": "openhim",
+      "password": "HLh6eX4f?#tc4R@F",
       "apiURL": "https://openhim-core:8080",
       "trustSelfSigned": true,
       "urn": "urn:mediator:hl7v2tofhir_translator"

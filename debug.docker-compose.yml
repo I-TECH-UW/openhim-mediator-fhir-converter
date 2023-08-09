@@ -14,7 +14,7 @@ services:
     container_name: built-fhir-converter
     hostname: fhir-converter
     restart: unless-stopped
-    image: ghcr.io/b-techbw/openhim-mediator-fhir-converter:local
+    image: ghcr.io/b-techbw/openhim-mediator-fhir-converter:debug
     build: ./
     ports:
       - 2019:2019
@@ -22,7 +22,7 @@ services:
     volumes:
       - ./config.json:/app/config.json
       - ./package.json:/app/package.json
-    entrypoint: /app/deploy/debwug.sh
+    entrypoint: /app/deploy/debug.sh
     networks:
       - hie
     # tty: true

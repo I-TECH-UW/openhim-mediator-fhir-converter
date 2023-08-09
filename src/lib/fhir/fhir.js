@@ -101,6 +101,7 @@ module.exports = class fhir extends dataHandler {
         } catch (error) {
             console.log(`Can't get target location information from \n${JSON.stringify(bundle)}`)
         }
+            console.log(`Target facility: ${JSON.stringify(res.targetFacility)}`)
         return res
     }
 
