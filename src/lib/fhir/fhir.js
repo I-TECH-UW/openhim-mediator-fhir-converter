@@ -155,8 +155,13 @@ module.exports = class fhir extends dataHandler {
             let ipmsCode = serviceRequest.code.coding.find(e => e.system == "https://api.openconceptlab.org/orgs/I-TECH-UW/sources/IPMSLAB/")
             res.labOrderMnemonic = ipmsCode && ipmsCode.code ? ipmsCode.code : "";
             res.labOrderName = ipmsCode && ipmsCode.display ? ipmsCode.display : "";
+            if(ipmsCode && ipmsCode.extension && ipmsCode.extension.length > 0) {
+                let orderTypeFlag = ipmsCode.extension.find(e => e && e.url && e.url.includes("ipms-order-type") && e.valueString)
+                res.orderTypeFlag = orderTypeFlag ? orderTypeFlag.valueString : "LAB";
+            }
         }
         
+    
         return res;
     }
 
