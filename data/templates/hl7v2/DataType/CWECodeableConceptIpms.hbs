@@ -1,0 +1,49 @@
+"coding":
+[
+    {
+    	{{#if mapping}}
+			{{#with (evaluate mapping inCode=CWE-1)}}
+                "code":"{{code}}",
+                "display":"{{display}}",
+                "system":"{{system}}",
+                "version":"{{version}}",
+        	{{/with}}
+		{{else}}
+            "code":"{{CWE-1}}",
+            "display":"{{CWE-2}}",
+            "system":"https://api.openconceptlab.org/orgs/I-TECH-UW/sources/IPMSLAB/",
+            "version":"{{CWE-7}}",
+        {{/if}}
+    },
+    {
+        {{#if mapping}}
+            {{#with (evaluate mapping inCode=CWE-4)}}
+                "code":"{{code}}",
+                "display":"{{display}}",
+                "system":"{{system}}",
+                "version":"{{version}}",
+        	{{/with}}
+		{{else}}
+            "code":"{{CWE-4}}",
+            "display":"{{CWE-5}}",
+            "system":"https://api.openconceptlab.org/orgs/I-TECH-UW/sources/IPMSLAB/",
+            "version":"{{CWE-8}}",
+        {{/if}}
+    },
+    {
+        {{#if mapping}}
+            {{#with (evaluate mapping inCode=CWE-10)}}
+                "code":"{{code}}",
+                "display":"{{display}}",
+                "system":"{{system}}",
+                "version":"{{version}}",
+        	{{/with}}
+        {{else}}
+            "code":"{{CWE-10}}",
+            "display":"{{CWE-11}}",
+            "system":"https://api.openconceptlab.org/orgs/I-TECH-UW/sources/IPMSLAB/",
+            "version":"{{CWE-13}}",
+        {{/if}}
+    },
+],
+"text":"{{CWE-9}}",

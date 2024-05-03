@@ -141,7 +141,8 @@ module.exports = class fhir extends dataHandler {
         res = this.setProviderData(provider, res);
 
         res.facilityId = sourceLocation ? sourceLocation.id : "";
-        res.labOrderId = task.identifier ? task.identifier[0].value : "";
+        res.labOrderId = serviceRequest ? serviceRequest.id : "";
+        
         let orderDateTime = new Date()
         try {
             orderDateTime = serviceRequest.authoredOn ? new Date(serviceRequest.authoredOn) : (task.authoredOn ? new Date(task.authoredOn) : orderDateTime)
