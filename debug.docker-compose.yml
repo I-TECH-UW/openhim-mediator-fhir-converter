@@ -14,7 +14,7 @@ services:
     container_name: built-fhir-converter
     hostname: fhir-converter
     restart: unless-stopped
-    image: ghcr.io/b-techbw/openhim-mediator-fhir-converter:local
+    image: itechuw/openhim-mediator-fhir-converter:debug
     build: ./
     ports:
       - 2019:2019
@@ -32,4 +32,4 @@ services:
 networks:
   hie:
     external: true
-    name: hie-botswana_hie
+    name: openhim_public
